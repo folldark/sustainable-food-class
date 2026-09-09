@@ -131,7 +131,7 @@ sections=[]
 for i,s in enumerate(slides):
     sections.append(f'<section class="slide {s["theme"]} {s["cls"]}" data-section="{s["section"]}" aria-hidden="{str(i!=0).lower()}"><div class="slide-inner"><h{1 if i==0 else 2}>{s["title"]}</h{1 if i==0 else 2}>{s["body"]}</div><aside class="speaker-notes">{s["notes"]}</aside></section>')
 deck='''<main id="deck" aria-label="永續小食堂投影片">'''+''.join(sections)+'''</main>
-<nav class="controls" aria-label="投影片導覽"><a href="teacher.html" target="_blank" rel="noopener">教師備課</a><button id="prev" aria-label="上一張">←</button><span id="counter"></span><button id="next" aria-label="下一張">→</button><button id="notes-button">備註 N</button><button id="fullscreen">全螢幕 F</button><button id="overview">目錄</button></nav>
+<nav class="controls" aria-label="投影片導覽"><a href="../../index.html">課程首頁</a><a href="teacher.html" target="_blank" rel="noopener">教師備課</a><button id="prev" aria-label="上一張">←</button><span id="counter"></span><button id="next" aria-label="下一張">→</button><button id="notes-button">備註 N</button><button id="fullscreen">全螢幕 F</button><button id="overview">目錄</button></nav>
 <aside id="notes-panel" hidden><button id="close-notes">關閉</button><h3>講者備註</h3><p id="notes-copy"></p><p class="small">本面板會出現在投影畫面，遊戲時請先關閉。</p></aside>
 <dialog id="toc"><h2>投影片目錄</h2><div id="toc-links"></div><button id="close-toc">關閉</button></dialog><script src="lesson.js"></script>'''
 (HERE/'index.html').write_text(htmlpage('食物背後的關係｜永續小食堂',deck))

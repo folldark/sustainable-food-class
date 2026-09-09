@@ -352,6 +352,7 @@ p, li { font-size: clamp(1.15rem, 2.15vw, 2rem); line-height: 1.5; }
 }
 .chrome button:disabled { opacity: 0.28; cursor: default; }
 .chrome button:focus-visible { outline: 3px solid var(--mango); outline-offset: 3px; }
+.course-link { font-size: 0.8rem; text-decoration: none; white-space: nowrap; padding-block: 0.6rem; }
 .progress-shell { flex: 1; height: 2px; background: rgb(255 255 255 / 0.28); }
 #progress { display: block; width: 0; height: 100%; background: white; transition: width 380ms var(--ease); }
 #counter { min-width: 5.2rem; font-size: 0.78rem; font-variant-numeric: tabular-nums; letter-spacing: 0.08em; text-align: center; }
@@ -415,6 +416,34 @@ dialog dd { margin: 0; color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
+
+/* 課程首頁與各單元投影片共用同一組色票與字型。 */
+body.course-home {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+  background: var(--paper);
+  padding: clamp(2rem, 7vw, 7rem) clamp(1.5rem, 9vw, 10rem);
+}
+.course-header { padding-block: 2rem 3rem; border-top: 3px solid var(--forest); }
+.course-header h1 { font-size: clamp(2.8rem, 6.8vw, 6.4rem); margin-block: 0.35em; }
+.course-header .term { display: block; font-size: 0.45em; letter-spacing: 0; color: var(--teal); margin-bottom: 0.5em; }
+.course-header .intro { max-width: 34em; font-size: clamp(1rem, 1.5vw, 1.35rem); color: var(--muted); }
+.lesson-index h2 { font-size: 1rem; letter-spacing: 0.12em; margin-bottom: 1rem; }
+.lesson-list { list-style: none; margin: 0; padding: 0; }
+.lesson-entry { display: grid; grid-template-columns: 10rem 1fr auto; align-items: center; gap: 1.5rem; padding-block: 2rem; border-block: 1px solid #cfc6b0; text-decoration: none; }
+.lesson-entry time { font-size: 1rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.lesson-entry strong { display: block; font-size: clamp(1.5rem, 2.6vw, 2.3rem); }
+.lesson-entry .entry-sub { display: block; margin-top: 0.35em; font-size: 0.95rem; color: var(--muted); }
+.lesson-entry .entry-action { font-size: 0.9rem; color: var(--teal); white-space: nowrap; }
+.lesson-entry:hover { color: var(--forest); background: var(--cream); }
+.lesson-entry:focus-visible { outline: 3px solid var(--mango); outline-offset: 4px; }
+.course-footer { margin-top: 4rem; color: var(--muted); }
+.course-footer p { margin: 0; font-size: 0.85rem; }
+@media (max-width: 720px) {
+  .lesson-entry { grid-template-columns: 1fr auto; gap: 0.7rem; }
+  .lesson-entry time { grid-column: 1 / -1; }
 }
 
 @media print {
