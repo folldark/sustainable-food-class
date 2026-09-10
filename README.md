@@ -5,7 +5,7 @@
 目前單元：
 
 - **2026-09-04 課程簡介與緒論**，共 36 張投影片。多元選修怎麼選、升學制度插播、課程規則、分組活動，以及飲食與永續緒論。
-- **2026-09-10 地球界限與食物工業化**，共 32 張投影片。食物版「誰是臥底」、地球界限開場、食品工業化與資本主義下的食物供應，以及 draw.io 食物關係圖活動。另附教師指南、30 張遊戲卡、學生任務頁、可編輯 draw.io 模板、PDF 與離線教材包。
+- **2026-09-10 地球界限與食物工業化**，共 41 張投影片。第一節玩食物版「誰是臥底」蒐集學生自己的描述，第二節用講述帶工業革命、食品工業化與消費社會，收在兩個真實案例：2018 年美國蘿蔓生菜大腸桿菌疫情，以及墨西哥灣缺氧區。另附教師指南、19 組題庫、30 張遊戲卡、PDF 與離線教材包。原先規劃的 draw.io 食物關係圖活動改為講述，模板與紙本備援保留在資料夾內供後續週次使用。
 
 ## 目錄結構
 
@@ -79,7 +79,20 @@ python3 -m http.server 8000
 6. 在根目錄 `index.html` 的 `.lesson-list` 複製一個 `<li>`，更新入口相對路徑、日期、名稱與一句話說明。
 7. 本地預覽，檢查正文、投影畫面、手機、換頁與連結，並在 README 補上新增圖片的來源與授權說明。
 
-修改 `2026-09-10` 的內容一律改 `build.py` 再重新執行 `python3 build.py`，不要直接改該資料夾的 HTML，否則下次重建會被覆寫。PDF 與 `lesson-pack.zip` 不由 `build.py` 產生，內容變動後需另行重新輸出。
+修改 `2026-09-10` 的內容一律改 `build.py` 再重新執行 `python3 build.py`，不要直接改該資料夾的 HTML，否則下次重建會被覆寫。
+
+PDF 與 `lesson-pack.zip` 不由 `build.py` 產生。改完內容後，在 repo 根目錄起本地伺服器，再用 Playwright 重新輸出：
+
+```bash
+python3 -m http.server 8765
+node pdfs.mjs      # 對 index.html、cards.html、template-print.html 呼叫 page.pdf()
+zip -r lesson-pack.zip index.html student.html teacher.html teacher-guide.md \
+  cards.html cards.pdf template-print.html template-print.pdf \
+  food-relationships.drawio slides.pdf lesson.css lesson.js handout.css \
+  slide-notes.json build.py assets
+```
+
+`cards.pdf` 一定要跟著題庫重新輸出，否則老師會印到舊的臥底題目。
 
 ## 設計與內容說明
 
@@ -91,7 +104,16 @@ python3 -m http.server 8000
 
 `lessons/2026-09-04-課程簡介與緒論/assets/` 的 `food-system.png` 與 `hidden-costs.png` 由 OpenAI ImageGen 依本課程需求產生，未使用外部圖片素材。
 
-`lessons/2026-09-10/assets/planetary-boundaries-2025.jpg` 為 Azote for Stockholm Resilience Centre，based on Sakschewski and Caesar et al. 2025，授權 CC BY-NC-ND 3.0。
+`lessons/2026-09-10/assets/` 的四張圖都是外部來源，非自製：
+
+| 檔案 | 來源 | 授權或狀態 |
+| --- | --- | --- |
+| `planetary-boundaries-2025.jpg` | Azote for Stockholm Resilience Centre, based on Sakschewski and Caesar et al. 2025 | CC BY-NC-ND 3.0 |
+| `romaine-ecoli-2018-cdc-map.jpg` | U.S. CDC，2018 年蘿蔓生菜 E. coli O157:H7 疫情各州病例分布圖 | 美國聯邦政府作品 |
+| `gulf-hypoxia-2025-map.jpg` | LSU 與 NOAA，2025 Shelfwide Cruise 底層溶氧圖，裁切自原始雙欄圖上半部 | 教學使用並標示出處 |
+| `gulf-hypoxia-1985-2025-chart.jpg` | LSU 與 NOAA，1985–2025 年底層缺氧面積長條圖，裁切自同一張原始圖下半部 | 教學使用並標示出處 |
+
+投影片上都保留了原始出處字樣。
 
 ## 授權
 
