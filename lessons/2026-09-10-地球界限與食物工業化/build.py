@@ -5,7 +5,6 @@ import base64, json, urllib.parse, zlib
 import xml.etree.ElementTree as ET
 
 HERE = Path(__file__).parent
-BASE = 'https://folldark.github.io/sustainable-food-class/lessons/2026-09-10/'
 PB = 'https://www.stockholmresilience.org/research/planetary-boundaries.html'
 FOOD = 'https://www.nature.com/articles/s43016-025-01252-6'
 CDCE = 'https://archive.cdc.gov/www_cdc_gov/ecoli/2018/o157h7-04-18/index.html'
@@ -206,7 +205,7 @@ guide='''# 9/10 永續小食堂教師指南
 | 0–7 | 喜歡的食物、地球界限、食物的環境壓力 | 只用一張官方圖，不逐項講授或災難倒數 |
 | 7–12 | 遊戲規則與旁觀任務 | 五組各派兩人，觀眾記原話 |
 | 12–15 | 文具示範 | 示範一句描述與同時投票，不洩漏食物題目 |
-| 15–39 | 三輪各 8 分鐘 | 主題依序奇異果／蘋果、鮮奶／豆漿、泡麵／冷凍水餃 |
+| 15–39 | 三輪各 8 分鐘 | 主題依序咖啡／紅茶、麻糬／蜂蜜蛋糕、泡麵／冷凍水餃 |
 | 39–48 | 收集原話與追問 | 原話先記錄，再區分觀察、印象與待查問題 |
 | 48–50 | 留下一個問題 | 下節接生產與供應的做法 |
 
@@ -350,6 +349,7 @@ def render_md(s):
             result.append('<tr>'+''.join('<td>'+inline(c.strip())+'</td>' for c in cells)+'</tr>'); continue
         if table: result.append('</table></div>'); table=False
         if line.startswith('# '): result.append('<h1>'+inline(line[2:])+'</h1>')
+        elif line.startswith('### '): result.append('<h3>'+inline(line[4:])+'</h3>')
         elif line.startswith('## '): result.append('<h2>'+inline(line[3:])+'</h2>')
         elif line: result.append('<p>'+inline(line)+'</p>')
     if table: result.append('</table></div>')
