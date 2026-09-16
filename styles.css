@@ -452,3 +452,59 @@ body.course-home {
   .slide { position: relative; min-height: 100vh; visibility: visible; opacity: 1; transform: none; break-after: page; }
   .chrome, .notes-panel, dialog { display: none; }
 }
+
+/* 2026-09-17 起：引擎換成 research-writing-class 版 app.js，控制列多了「備註」與「全螢幕」兩顆文字鈕。 */
+.chrome #notes, .chrome #fullscreen { width: auto; height: auto; min-height: 2.35rem; padding: 0.3rem 0.6rem; border-radius: 0; border: 0; font-size: 0.8rem; white-space: nowrap; }
+.chrome button:focus-visible, .chrome a:focus-visible { outline: 3px solid var(--mango); outline-offset: 3px; }
+.notes-panel[inert] { pointer-events: none; }
+.deck { overflow: clip; } /* 以 #slide-N 開啟時不讓瀏覽器把版面橫向捲到隱藏的下一張 */
+.title-slide h1.multi-line { max-width: none; font-size: clamp(3.6rem, 10.5vw, 9rem); line-height: 1.04; letter-spacing: -0.05em; }
+
+/* 2026-09-17 為什麼跨國企業壓榨小農：本單元新增的版面。 */
+.photo-trio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: clamp(0.8rem, 2vw, 1.6rem); height: 100%; min-height: 0; }
+.photo-trio img { width: 100%; height: 100%; min-height: 0; object-fit: cover; border-radius: 1rem; box-shadow: var(--shadow); }
+.photo-trio h2 { align-self: center; max-width: 14ch; font-size: clamp(2rem, 4.6vw, 4.6rem); }
+.photo-trio-slide { grid-template-rows: minmax(0, 1fr); }
+.stat-slide h2 { max-width: none; font-size: clamp(1.8rem, 3.6vw, 3.4rem); letter-spacing: -0.03em; }
+.stat-slide .score-grid strong { font-size: clamp(2.6rem, 5vw, 4.8rem); }
+.slide[data-theme="forest"] .score-grid article:first-child { background: var(--paper); color: var(--ink); }
+
+.figure-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 5vw, 5rem); }
+.figure-split .display-copy { max-width: none; }
+.figure-split figure { margin: 0; justify-self: center; }
+.figure-split img { width: min(100%, 24rem); border-radius: 0.8rem; box-shadow: var(--shadow); }
+.figure-split figcaption { margin-top: 0.6rem; font-size: clamp(0.7rem, 1.05vw, 0.95rem); color: var(--muted); text-align: center; }
+
+.data-table { width: 100%; max-width: 60rem; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.data-table th, .data-table td { padding: 0.45em 0.8em; border-bottom: 1px solid rgb(31 48 44 / 0.18); font-size: clamp(1rem, 1.9vw, 1.7rem); text-align: left; }
+.data-table th { font-weight: 800; }
+.data-table td:not(:first-child), .data-table th:not(:first-child) { text-align: right; }
+.data-table tr.total td { font-weight: 850; border-bottom-width: 2px; }
+.data-table tr.highlight td { color: var(--coral); font-weight: 850; }
+.slide[data-theme="forest"] .data-table th, .slide[data-theme="forest"] .data-table td { border-color: rgb(255 250 240 / 0.25); }
+
+.link-card { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(1rem, 2.5vw, 2rem); width: fit-content; max-width: 52rem; padding: clamp(1.2rem, 2.5vw, 2rem) clamp(1.5rem, 3vw, 2.6rem); border-radius: 1.4rem; background: rgb(255 250 240 / 0.12); color: inherit; text-decoration: none; box-shadow: var(--shadow); transition: transform 200ms var(--ease), background 200ms ease; }
+.link-card:hover, .link-card:focus-visible { background: rgb(255 250 240 / 0.2); transform: translateY(-2px); }
+.link-card:focus-visible { outline: 3px solid var(--mango); outline-offset: 4px; }
+.link-card .play { display: grid; place-items: center; width: clamp(3.4rem, 6vw, 5.4rem); aspect-ratio: 1; border-radius: 50%; background: var(--coral); color: white; font-size: clamp(1.4rem, 2.6vw, 2.4rem); }
+.link-card strong { display: block; font-size: clamp(1.15rem, 2.2vw, 2rem); line-height: 1.35; }
+.link-card small { display: block; margin-top: 0.4em; font-size: clamp(0.85rem, 1.4vw, 1.2rem); opacity: 0.75; }
+
+.image-section.top-title { align-content: start; }
+.image-title.top { margin: 7vh 9vw 0; }
+.image-title h2.small { max-width: none; font-size: clamp(2.6rem, 6vw, 5.6rem); text-shadow: 0 2px 18px rgb(0 0 0 / 0.45); }
+.image-full { padding: 0; }
+.image-full > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.image-full::before { color: var(--ink); }
+
+@media (max-width: 760px) {
+  .chrome #fullscreen { display: none; }
+  .photo-trio { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
+  .photo-trio img { aspect-ratio: 4 / 3; }
+  .photo-trio-slide { grid-template-rows: none; overflow: auto; }
+  .figure-split { grid-template-columns: 1fr; }
+  .figure-split img { width: min(100%, 14rem); }
+  .data-table th, .data-table td { padding: 0.35em 0.4em; }
+  .link-card { grid-template-columns: 1fr; }
+}
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

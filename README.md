@@ -6,6 +6,7 @@
 
 - **2026-09-04 課程簡介與緒論**，共 36 張投影片。多元選修怎麼選、升學制度插播、課程規則、分組活動，以及飲食與永續緒論。
 - **2026-09-10 地球界限與食物工業化**，共 41 張投影片。第一節玩食物版「誰是臥底」蒐集學生自己的描述，第二節用講述帶工業革命、食品工業化與消費社會，收在兩個真實案例：2018 年美國蘿蔓生菜大腸桿菌疫情，以及墨西哥灣缺氧區。另附教師指南、19 組題庫、30 張遊戲卡、PDF 與離線教材包。原先規劃的 draw.io 食物關係圖活動改為講述，模板與紙本備援保留在資料夾內供後續週次使用。
+- **2026-09-17 為什麼跨國企業壓榨小農**，共 20 張投影片。由舊 Keynote 投影片（14 頁 PDF）轉製：從早餐那杯咖啡出發，咖啡產業現況（全球、區域、台灣、生豆價格）換成 2026 年 8 月 ICO 月報與台灣近兩年統計，「來種咖啡好不好？」之後插入志祺七七的咖啡產業影片連結，再進三個咖啡農情境題、資本主義的強制競爭原則與 SDGs。
 
 ## 目錄結構
 
@@ -25,6 +26,10 @@ sustainable-food-class/
     │   └── assets/
     │       ├── food-system.png
     │       └── hidden-costs.png
+    ├── 2026-09-17-為什麼跨國企業壓榨小農/
+    │   ├── index.html               # 本次投影片（共用根目錄引擎）
+    │   ├── 講義原稿.md               # 舊 PDF 逐頁轉錄
+    │   └── assets/                  # 六張圖，來源見下方
     └── 2026-09-10-地球界限與食物工業化/   # 由 build.py 產生，自帶樣式與引擎
         ├── build.py                 # 唯一的編輯入口，改內容後重新執行
         ├── index.html               # 投影片（產生物）
@@ -39,7 +44,9 @@ sustainable-food-class/
         └── assets/planetary-boundaries-2025.jpg
 ```
 
-兩個單元的投影片引擎目前並不共用：`2026-09-04-課程簡介與緒論` 使用根目錄的 `styles.css` 與 `app.js`，`2026-09-10-地球界限與食物工業化` 是 `build.py` 產出的自帶樣式版本。共用的是課程首頁、色票與字型。日後若要統一，再把新單元收斂到其中一種寫法。
+投影片引擎分兩種：`2026-09-04-課程簡介與緒論` 與 `2026-09-17-為什麼跨國企業壓榨小農` 使用根目錄的 `styles.css` 與 `app.js`；`2026-09-10-地球界限與食物工業化` 是 `build.py` 產出的自帶樣式版本。共用的是課程首頁、色票與字型。日後新單元一律用根目錄引擎。
+
+根目錄 `app.js` 自 2026-09-17 起與 `folldark/research-writing-class` 的版本相同（`data-title`、控制列的「備註」與「全螢幕」按鈕、非當前投影片加 `inert`）；`2026-09-04` 的 HTML 已補上這兩顆按鈕。
 
 ## 本地預覽
 
@@ -55,7 +62,7 @@ python3 -m http.server 8000
 
 ## 操作方式
 
-`2026-09-04-課程簡介與緒論` 單元：
+`2026-09-04-課程簡介與緒論`、`2026-09-17-為什麼跨國企業壓榨小農` 單元：
 
 | 按鍵／操作 | 功能 |
 | --- | --- |
@@ -65,16 +72,16 @@ python3 -m http.server 8000
 | `F` | 進入或離開全螢幕 |
 | `N` | 開啟或關閉講者備註 |
 | 左右滑動 | 觸控換頁 |
-| 底部控制列 | 換頁、說明與返回課程首頁 |
+| 底部控制列 | 換頁、備註、全螢幕、說明與返回課程首頁 |
 
 `2026-09-10-地球界限與食物工業化` 單元：方向鍵換頁，`N` 開關備註，`F` 全螢幕，底部控制列另有目錄、教師備課與返回課程首頁。遊戲進行時務必關閉備註，備註內含臥底題目。
 
 ## 日後新增單元
 
 1. 在 `lessons/` 建立 `YYYY-MM-DD-單元名稱/`，把新原稿存成 `講義原稿.md`，圖片放進該資料夾的 `assets/`。
-2. 複製 `2026-09-04-課程簡介與緒論/index.html` 作為骨架，更改頁面 `<title>`、description、日期與封面資訊，替換 `<main class="deck">` 內的投影片內容。維持 `lang="zh-Hant-TW"`。
+2. 複製 `2026-09-17-為什麼跨國企業壓榨小農/index.html` 作為骨架（控制列已含備註與全螢幕按鈕，`<main>` 要有 `tabindex="-1"` 與 `data-title`），更改頁面 `<title>`、description、日期與封面資訊，替換 `<main class="deck">` 內的投影片內容。維持 `lang="zh-Hant-TW"`。
 3. 每張投影片保留 `class="slide"`、`data-section` 與 `data-theme`；主題色可用 `forest`、`cream`、`paper`、`mango`、`teal`。頁數與進度由 `app.js` 自動計算，不必修改。
-4. 依內容選用 `title-slide`、`section-slide`、`statement-slide`、`question-slide`。講者提示放在 `<aside class="speaker-notes">`，不擴寫原稿正文；沒有實質提示就不要放空泛的罐頭備註。
+4. 依內容選用 `title-slide`、`section-slide`、`statement-slide`、`question-slide`；數據頁用 `stat-slide` 加 `.score-grid` 或 `.data-table`，外部連結用 `.link-card`，多張照片用 `.photo-trio`，整張圖用 `.image-full`（都定義在 `styles.css` 末尾）。講者提示放在 `<aside class="speaker-notes">`，不擴寫原稿正文；沒有實質提示就不要放空泛的罐頭備註。
 5. 保留頁面底部控制列、講者備註面板、說明 dialog 與 `class="course-link"` 的返回首頁連結。共用檔案繼續引用 `../../styles.css`、`../../app.js`、`../../favicon.svg`；單元圖片用 `assets/圖片.png`。
 6. 在根目錄 `index.html` 的 `.lesson-list` 複製一個 `<li>`，更新入口相對路徑、日期、名稱與一句話說明。
 7. 本地預覽，檢查正文、投影畫面、手機、換頁與連結，並在 README 補上新增圖片的來源與授權說明。
@@ -114,6 +121,19 @@ zip -r lesson-pack.zip index.html student.html teacher.html teacher-guide.md \
 | `gulf-hypoxia-1985-2025-chart.jpg` | LSU 與 NOAA，1985–2025 年底層缺氧面積長條圖，裁切自同一張原始圖下半部 | 教學使用並標示出處 |
 
 投影片上都保留了原始出處字樣。
+
+`lessons/2026-09-17-為什麼跨國企業壓榨小農/assets/` 的六張圖皆從老師原本的 Keynote 投影片抽出，非自製，來源多數未標示：
+
+| 檔案 | 內容 | 來源或狀態 |
+| --- | --- | --- |
+| `breakfast-toast.jpg` | 熱壓三明治早午餐 | 部落格「奇奇一起玩樂趣」（浮水印 lotuslin.pixnet.net），教學使用 |
+| `lurou-rice.jpg` | 滷肉飯 | 浮水印 cook_draw_eat，來源未查，教學使用 |
+| `misua.jpg` | 大腸麵線 | 來源未查，教學使用 |
+| `coffee-tea-or-me.jpg` | Rich Amooi《Coffee, Tea or Me》書封 | 出版品封面，投影片上有標示 |
+| `coffee-farmers-motorbike.jpg` | 兩位咖啡農騎機車載咖啡豆 | 來源未查，教學使用 |
+| `sdgs-17-goals-zh.png` | 聯合國 17 項 SDGs 中文版圖示 | 聯合國 SDGs 識別，教學使用 |
+
+原投影片的 ICO 消費表與今周刊報導截圖未沿用，數據改以 ICO《Coffee Market Report》（2025 年 12 月、2026 年 8 月）、經濟日報、自由時報與未來流通研究所的統計重排，各張投影片下方都有來源列。
 
 ## 授權
 

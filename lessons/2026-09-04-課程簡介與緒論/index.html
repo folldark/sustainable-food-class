@@ -15,7 +15,7 @@
   <body>
     <a class="skip-link" href="#deck">跳到投影片</a>
 
-    <main id="deck" class="deck" aria-live="polite">
+    <main id="deck" class="deck" tabindex="-1" data-title="課程簡介與緒論｜115-1 永續小食堂" aria-live="polite">
       <section class="slide title-slide is-active" data-section="開場" data-theme="forest">
         <div class="eyebrow">多元選修</div>
         <h1><span class="accent-mango">永續</span>小食堂</h1>
@@ -325,10 +325,12 @@
       <div class="progress-shell" aria-hidden="true"><span id="progress"></span></div>
       <p id="counter" aria-label="投影片頁碼">01 / 36</p>
       <button id="next" type="button" aria-label="下一張投影片">→</button>
+      <button id="notes" type="button" aria-label="開啟講者備註" aria-controls="notes-panel" aria-expanded="false">備註</button>
+      <button id="fullscreen" type="button" aria-label="進入全螢幕">全螢幕</button>
       <button id="help" type="button" aria-label="顯示快捷鍵說明">?</button>
     </div>
 
-    <aside id="notes-panel" class="notes-panel" aria-hidden="true">
+    <aside id="notes-panel" class="notes-panel" aria-hidden="true" inert>
       <div><strong>講者備註</strong><button id="close-notes" type="button" aria-label="關閉講者備註">×</button></div>
       <p id="notes-copy">這張沒有額外備註。</p>
     </aside>
