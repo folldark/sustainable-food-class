@@ -15,8 +15,12 @@
   const fullscreenButton = byId("fullscreen");
   const deckTitle = deck.dataset.title || document.title;
   let current = 0;
+  // 快速跳頁：直接打數字＋Enter，或按 G／點頁碼開啟目錄。目錄由投影片自動生成，不必手寫。
+  let typed = "";
+  let typedTimer = 0;
   const clamp = (value) => Math.min(Math.max(value, 0), slides.length - 1);
   const format = (value) => String(value).padStart(2, "0");
+  const gotoDialog = buildGotoDialog();
 
   function indexFromHash() {
     const match = location.hash.match(/^#slide-(\d+)$/);
@@ -42,6 +46,56 @@
     document.title = `${slides[current].dataset.section}｜${deckTitle}`;
     byId("notes-copy").textContent = slides[current].querySelector(".speaker-notes")?.textContent.trim() || "這張沒有額外備註。";
     if (updateHash) history.replaceState(null, "", `#slide-${current + 1}`);
+    gotoDialog.querySelectorAll("[data-index]").forEach((item) => item.toggleAttribute("aria-current", Number(item.dataset.index) === current));
+  }
+  function slideLabel(slide) {
+    const heading = slide.querySelector("h1, h2");
+    const text = (heading?.textContent || slide.querySelector("p")?.textContent || "").replace(/\s+/g, " ").trim();
+    return text.length > 42 ? `${text.slice(0, 42)}…` : text;
+  }
+  function buildGotoDialog() {
+    const dialog = document.createElement("dialog");
+    dialog.id = "goto-dialog";
+    dialog.className = "goto-dialog";
+    dialog.setAttribute("aria-labelledby", "goto-title");
+    const items = slides.map((slide, index) => `<li><button type="button" data-index="${index}"><span class="goto-num">${format(index + 1)}</span><span class="goto-section">${slide.dataset.section || ""}</span><span class="goto-heading">${slideLabel(slide)}</span></button></li>`).join("");
+    // 「前往」必須是表單裡第一個 submit，輸入框按 Enter 才會走它；關閉鈕放最後。
+    dialog.innerHTML = `<form method="dialog"><h2 id="goto-title">跳到</h2><p class="goto-row"><label for="goto-input">頁碼</label><input id="goto-input" type="number" min="1" max="${slides.length}" inputmode="numeric" autocomplete="off" /><button type="submit" value="go">前往</button><span class="goto-hint">或直接在投影片上打數字再按 Enter</span></p><ol class="goto-list">${items}</ol><button class="dialog-close" type="submit" value="cancel" aria-label="關閉目錄">×</button></form>`;
+    dialog.addEventListener("click", (event) => {
+      const item = event.target.closest("[data-index]");
+      if (!item) return;
+      dialog.close("cancel");
+      showSlide(Number(item.dataset.index));
+    });
+    dialog.addEventListener("close", () => {
+      const input = dialog.querySelector("#goto-input");
+      if (dialog.returnValue === "go" && input.value) showSlide(Number(input.value) - 1);
+      input.value = "";
+      deck.focus({ preventScroll: true });
+    });
+    document.body.append(dialog);
+    return dialog;
+  }
+  function openGoto() {
+    if (gotoDialog.open) return;
+    clearTyped();
+    gotoDialog.returnValue = "";
+    gotoDialog.showModal();
+    const input = gotoDialog.querySelector("#goto-input");
+    input.value = "";
+    input.focus();
+    gotoDialog.querySelector("[aria-current]")?.scrollIntoView({ block: "center" });
+  }
+  function clearTyped() {
+    typed = "";
+    clearTimeout(typedTimer);
+    counter.textContent = `${format(current + 1)} / ${format(slides.length)}`;
+  }
+  function typeDigit(digit) {
+    typed = (typed + digit).slice(-3);
+    counter.textContent = `→ ${typed}_`;
+    clearTimeout(typedTimer);
+    typedTimer = setTimeout(clearTyped, 4000);
   }
   function toggleNotes(force) {
     const open = typeof force === "boolean" ? force : !notesPanel.classList.contains("is-open");
@@ -72,11 +126,14 @@
     fullscreenButton.setAttribute("aria-label", active ? "離開全螢幕" : "進入全螢幕");
   }
   document.addEventListener("keydown", (event) => {
-    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing || helpDialog.open) return;
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing || helpDialog.open || gotoDialog.open) return;
     const target = event.target;
     if (target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) return;
     // 焦點在按鈕／連結上時，Enter、Space 保留原生啟用行為；方向鍵仍可換頁。
     if (["Enter", " "].includes(event.key) && target.closest("a, button, summary")) return;
+    if (/^[0-9]$/.test(event.key)) { event.preventDefault(); typeDigit(event.key); return; }
+    if (typed && event.key === "Enter") { event.preventDefault(); const wanted = Number(typed); clearTyped(); showSlide(wanted - 1); return; }
+    if (typed && event.key === "Escape") { event.preventDefault(); clearTyped(); return; }
     const actions = {
       ArrowRight: () => showSlide(current + 1), ArrowDown: () => showSlide(current + 1),
       PageDown: () => showSlide(current + 1), Enter: () => showSlide(current + 1), " ": () => showSlide(current + 1),
@@ -84,6 +141,7 @@
       Home: () => showSlide(0), End: () => showSlide(slides.length - 1),
       f: toggleFullscreen, F: toggleFullscreen,
       n: () => toggleNotes(), N: () => toggleNotes(), Escape: () => toggleNotes(false),
+      g: openGoto, G: openGoto,
     };
     if (actions[event.key]) { event.preventDefault(); actions[event.key](); }
   });
@@ -93,6 +151,8 @@
   notesButton.addEventListener("click", () => toggleNotes());
   byId("close-notes").addEventListener("click", () => toggleNotes(false));
   fullscreenButton.addEventListener("click", toggleFullscreen);
+  counter.addEventListener("click", openGoto);
+  counter.title = "跳到指定頁（G）";
   window.addEventListener("hashchange", () => showSlide(indexFromHash(), false));
   document.addEventListener("fullscreenchange", syncFullscreen);
   document.addEventListener("webkitfullscreenchange", syncFullscreen);
