@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教師管理面板｜<?= GAME_TITLE ?></title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif;
+    background: #f0f2f5;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  #topbar {
+    background: #1a3a2a;
+    color: #e8dfc0;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #topbar small { font-size: 12px; opacity: 0.7; font-weight: normal; }
+
+  #app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+
+  /* ── 卡片 ── */
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 17px; font-weight: bold; color: #1a3a2a; }
+
+  /* 狀態徽章 */
+  .badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+  .badge-open     { background: #e8f5e9; color: #2e7d32; }
+  .badge-revealed { background: #e3f2fd; color: #1565c0; }
+  .badge-closed   { background: #f5f5f5; color: #9e9e9e; }
+
+  /* 提交數 */
+  .count-row {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1a3a2a;
+    margin-bottom: 4px;
+  }
+  .count-label { font-size: 12px; color: #888; margin-bottom: 16px; }
+
+  /* 字數限制 */
+  .limit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .limit-row label { font-size: 13px; color: #555; }
+  .limit-row input {
+    width: 70px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+  }
+  .btn-sm {
+    background: #e0e0e0;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #333;
+  }
+  .btn-sm:hover { background: #bdbdbd; }
+
+  /* 主要操作按鈕 */
+  .action-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-open    { background: #2e7d32; color: white; }
+  .btn-open:hover:not(:disabled) { background: #1b5e20; }
+
+  .btn-close   { background: #f57c00; color: white; }
+  .btn-close:hover:not(:disabled) { background: #e65100; }
+
+  .btn-reveal  { background: #1565c0; color: white; }
+  .btn-reveal:hover:not(:disabled) { background: #0d47a1; }
+
+  .btn-reset   { background: #6d4c41; color: white; }
+  .btn-reset:hover:not(:disabled) { background: #4e342e; }
+
+  /* 分隔線 */
+  .divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+
+  /* ── 排行榜 ── */
+  .lb-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  .lb-row .rank { width: 30px; color: #aaa; font-size: 12px; }
+  .lb-row .lname { flex: 1; }
+  .lb-row .lscore { font-weight: bold; color: #1a3a2a; }
+  .lb-row .ltext  { font-size: 12px; color: #888; font-style: italic; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 12px; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a3a2a; color: white;
+    padding: 12px 24px; border-radius: 30px;
+    font-size: 14px; transition: transform 0.3s; z-index: 999;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.error { background: #c62828; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span>教師管理面板｜<?= GAME_TITLE ?></span>
+  <small id="admin-email">載入中...</small>
+</div>
+
+<div id="app">
+  <div id="loading" class="card" style="text-align:center;padding:40px;color:#aaa">載入中...</div>
+  <div id="sections-container"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let adminData = [];
+let prevAdminJson = '';
+
+window.addEventListener('load', function() {
+  loadData();
+  setInterval(loadData, 6000);
+});
+
+function loadData() {
+  google.script.run
+    .withSuccessHandler(function(data) {
+      adminData = data;
+      document.getElementById('loading').style.display = 'none';
+      renderAdmin();
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById('loading').textContent = '錯誤：' + err.message;
+    })
+    .getAdminData();
+
+  google.script.run
+    .withSuccessHandler(function(s) {
+      document.getElementById('admin-email').textContent = s.email;
+    })
+    .getState();
+}
+
+function renderAdmin() {
+  const newJson = JSON.stringify(adminData);
+  if (newJson === prevAdminJson) return; // 資料沒變就不重建，避免畫面閃爍
+  prevAdminJson = newJson;
+
+  const container = document.getElementById('sections-container');
+  container.innerHTML = '';
+
+  adminData.forEach(function(sec) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'admin-card-' + sec.id;
+
+    const badgeMap = {
+      open:     '<span class="badge badge-open">進行中</span>',
+      revealed: '<span class="badge badge-revealed">已公布結果</span>',
+      closed:   '<span class="badge badge-closed">等待中</span>'
+    };
+
+    const isOpen     = sec.status === 'open';
+    const isRevealed = sec.status === 'revealed';
+    const isClosed   = sec.status === 'closed';
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${escHtml(sec.title)}</div>
+        ${badgeMap[sec.status] || ''}
+      </div>
+
+      <div class="count-row">${sec.count}</div>
+      <div class="count-label">人已送出標記</div>
+
+      <div class="limit-row">
+        <label>字數上限</label>
+        <input type="number" id="limit-${sec.id}" value="${sec.charLimit}" min="10" max="300">
+        <button class="btn-sm" onclick="setLimit(${sec.id})">更新</button>
+      </div>
+
+      <hr class="divider">
+
+      <div class="action-row">
+        <button class="btn btn-open"   ${!isClosed   ? 'disabled' : ''} onclick="doAction(${sec.id},'open')">▶ 開放本段</button>
+        <button class="btn btn-close"  ${!isOpen     ? 'disabled' : ''} onclick="doAction(${sec.id},'close')">⏸ 暫停標記</button>
+        <button class="btn btn-reveal" ${isRevealed || isClosed  ? 'disabled' : ''} onclick="confirmReveal(${sec.id})">📊 公布結果</button>
+        <button class="btn btn-reset"  ${isClosed && sec.count === 0 ? 'disabled' : ''} onclick="confirmReset(${sec.id})">↩ 重設</button>
+      </div>
+
+      <div id="lb-${sec.id}"></div>`;
+
+    container.appendChild(card);
+
+    // 若已公布，載入排行榜
+    if (isRevealed) {
+      loadLeaderboard(sec.id);
+    }
+  });
+}
+
+function doAction(sectionId, type) {
+  google.script.run
+    .withSuccessHandler(function() {
+      showToast('操作成功');
+      loadData();
+    })
+    .withFailureHandler(function(err) {
+      showToast('錯誤：' + err.message, true);
+    })
+    .adminAction({ sectionId: sectionId, type: type });
+}
+
+function setLimit(sectionId) {
+  const val = parseInt(document.getElementById('limit-' + sectionId).value);
+  if (isNaN(val) || val < 10 || val > 500) {
+    showToast('請輸入 10–500 之間的數字', true);
+    return;
+  }
+  google.script.run
+    .withSuccessHandler(function() { showToast('字數上限已更新'); loadData(); })
+    .withFailureHandler(function(err) { showToast('錯誤：' + err.message, true); })
+    .adminAction({ sectionId: sectionId, type: 'setLimit', charLimit: val });
+}
+
+function confirmReveal(sectionId) {
+  const sec = adminData.find(s => s.id === sectionId);
+  if (!confirm('公布「' + sec.title + '」的結果？學生將立即看到熱點圖和得分。')) return;
+  doAction(sectionId, 'reveal');
+}
+
+function confirmReset(sectionId) {
+  const sec = adminData.find(s => s.id === sectionId);
+  if (!confirm('確定重設「' + sec.title + '」？\n\n所有學生送出的標記將被刪除，狀態回到等待中。')) return;
+  doAction(sectionId, 'reset');
+}
+
+function loadLeaderboard(sectionId) {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      renderLeaderboard(sectionId, result);
+    })
+    .withFailureHandler(function() {})
+    .getResults(sectionId);
+}
+
+function renderLeaderboard(sectionId, result) {
+  const el = document.getElementById('lb-' + sectionId);
+  if (!el || !result.leaderboard || result.leaderboard.length === 0) return;
+
+  const medals = ['🥇', '🥈', '🥉'];
+  let html = '<hr class="divider"><div style="font-size:13px;color:#888;font-weight:bold;margin-bottom:8px">排行榜（共 ' + result.total + ' 人）</div>';
+  result.leaderboard.forEach(function(row, i) {
+    const rankStr = i < 3 ? medals[i] : (i + 1) + '.';
+    html += `<div class="lb-row">
+      <span class="rank">${rankStr}</span>
+      <span class="lname">${escHtml(row.name)}</span>
+      <span class="lscore">${row.score} 分</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (isError ? ' error' : '');
+  setTimeout(function() { t.className = ''; }, 3000);
+}
+</script>
+</body>
+</html>

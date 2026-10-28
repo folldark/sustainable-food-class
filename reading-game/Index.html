@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重點標記遊戲｜<?= GAME_TITLE ?></title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Serif TC', Georgia, serif;
+    background: #f5f0e8;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  /* ── 頂部狀態列 ── */
+  #topbar {
+    background: #1a3a2a;
+    color: #e8dfc0;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  #topbar .logo { font-weight: bold; font-size: 15px; letter-spacing: 1px; }
+  #topbar .user { opacity: 0.8; }
+
+  /* ── 主內容區 ── */
+  #app {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #1a3a2a;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 32px;
+  }
+
+  /* ── 段落卡片 ── */
+  .section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-left: 5px solid #ccc;
+    transition: border-color 0.3s;
+  }
+  .section-card.status-open   { border-left-color: #2e7d32; }
+  .section-card.status-revealed { border-left-color: #1565c0; }
+  .section-card.status-closed { border-left-color: #bdbdbd; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-size: 17px; font-weight: bold; color: #1a3a2a; }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: sans-serif;
+    font-weight: bold;
+  }
+  .badge-open     { background: #e8f5e9; color: #2e7d32; }
+  .badge-revealed { background: #e3f2fd; color: #1565c0; }
+  .badge-closed   { background: #f5f5f5; color: #9e9e9e; }
+  .badge-done     { background: #fff3e0; color: #e65100; }
+
+  /* ── 文章內文 ── */
+  .article-text {
+    font-size: 16px;
+    line-height: 2;
+    letter-spacing: 0.05em;
+    color: #333;
+    white-space: pre-wrap;
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* ── 選取提示 ── */
+  .selection-hint {
+    font-family: sans-serif;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  /* ── 行內高亮 ── */
+  .ch { display: inline; }
+  .user-highlight { background: #a5d6a7; border-radius: 1px; }
+
+  /* ── 選取工具列 ── */
+  .selection-toolbar {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f9f6ef;
+    border-radius: 8px;
+    border: 1px solid #e0d8c8;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .selection-toolbar.visible { display: flex; }
+
+  .char-counter {
+    font-family: sans-serif;
+    font-size: 13px;
+    color: #555;
+    flex: 1;
+    min-width: 120px;
+  }
+  .char-counter .count { font-weight: bold; }
+  .char-counter.over   { color: #c62828; }
+  .char-counter.ok     { color: #2e7d32; }
+
+  .btn-submit {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-submit:hover { background: #1b5e20; }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+  .btn-clear {
+    background: none;
+    border: 1px solid #bbb;
+    color: #666;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 8px;
+    font-family: sans-serif;
+  }
+
+  /* ── 等待狀態 ── */
+  .waiting-msg {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #9e9e9e;
+    text-align: center;
+    padding: 20px 0 8px;
+    font-style: italic;
+  }
+
+  /* ── 已送出狀態 ── */
+  .submitted-banner {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #fff3e0;
+    border-radius: 8px;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #e65100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .submitted-banner .my-text {
+    background: #ffe082;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-style: italic;
+  }
+
+  /* ── 熱點圖 ── */
+  .heatmap-section {
+    margin-top: 20px;
+  }
+  .heatmap-label {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+  }
+  .heatmap-text {
+    font-size: 16px;
+    line-height: 2;
+    letter-spacing: 0.05em;
+    word-break: break-all;
+  }
+  .heatmap-text .char { display: inline; }
+
+  /* 熱點顏色 */
+  .h0 { background: transparent; }
+  .h1 { background: #fff9c4; }
+  .h2 { background: #fff176; }
+  .h3 { background: #ffcc02; }
+  .h4 { background: #ffa726; }
+  .h5 { background: #ef6c00; color: white; }
+
+  /* 自己標記的部分 */
+  .my-highlight { outline: 2px solid #1565c0; outline-offset: 1px; border-radius: 2px; }
+
+  /* ── 得分卡 ── */
+  .score-card {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .score-box {
+    background: #f5f0e8;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    font-family: sans-serif;
+  }
+  .score-box .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .score-box .value { font-size: 28px; font-weight: bold; color: #1a3a2a; }
+
+  /* ── 排行榜 ── */
+  .leaderboard {
+    margin-top: 16px;
+  }
+  .leaderboard-title {
+    font-family: sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  .leaderboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: sans-serif;
+    font-size: 14px;
+    margin-bottom: 4px;
+    background: #fafafa;
+  }
+  .leaderboard-row.me { background: #e3f2fd; font-weight: bold; }
+  .leaderboard-row .rank { width: 30px; color: #888; font-size: 12px; }
+  .leaderboard-row .lname { flex: 1; }
+  .leaderboard-row .lscore { color: #1a3a2a; font-weight: bold; }
+
+  /* ── 圖例 ── */
+  .legend {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: sans-serif;
+    font-size: 11px;
+    color: #666;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  /* ── 載入中 ── */
+  #loading {
+    text-align: center;
+    padding: 80px 20px;
+    font-family: sans-serif;
+    color: #999;
+    font-size: 16px;
+  }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a3a2a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: sans-serif;
+    font-size: 14px;
+    transition: transform 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.error { background: #c62828; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="logo"><?= GAME_TITLE ?>｜重點標記遊戲</span>
+  <span class="user" id="user-email">載入中...</span>
+</div>
+
+<div id="loading">讀取中，請稍候...</div>
+
+<div id="app" style="display:none">
+  <div class="page-title">重點標記遊戲</div>
+  <div class="page-subtitle">每段限標記 N 字。標記你認為最重要的文字，看看和同學的選擇有多少重疊。</div>
+  <div id="sections-container"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── 狀態 ─────────────────────────────────────────────────
+let state = null;
+let sectionHighlights = {};   // sectionId → Set of charIdx
+let prevSectionStates = {};   // sectionId → JSON string（避免無謂重渲）
+let pollTimer = null;
+
+// ── 初始化 ────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  loadState();
+  pollTimer = setInterval(loadState, 5000);
+});
+
+function loadState() {
+  google.script.run
+    .withSuccessHandler(function(s) {
+      state = s;
+      document.getElementById('user-email').textContent = s.email || '未登入';
+      renderApp();
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById('loading').textContent = '載入失敗：' + err.message;
+    })
+    .getState();
+}
+
+// ── 渲染 ──────────────────────────────────────────────────
+function renderApp() {
+  const container = document.getElementById('sections-container');
+
+  // 第一次：建立所有卡片骨架（保持順序）
+  if (container.children.length === 0) {
+    state.sections.forEach(function(sec) {
+      const card = document.createElement('div');
+      card.id = 'section-' + sec.id;
+      container.appendChild(card);
+    });
+  }
+
+  state.sections.forEach(function(sec) {
+    // 只有狀態真正改變時才重建卡片（避免洗掉使用者的選取高亮）
+    const stateKey = JSON.stringify({
+      status: sec.status,
+      submitted: sec.submitted,
+      charLimit: sec.charLimit,
+      myText: sec.mySelection ? sec.mySelection.text : null
+    });
+    if (prevSectionStates[sec.id] === stateKey) return;
+    prevSectionStates[sec.id] = stateKey;
+
+    // 狀態改變時清除該段的暫存高亮
+    delete sectionHighlights[sec.id];
+
+    const card = document.getElementById('section-' + sec.id);
+    if (!card) return;
+
+    card.className = 'section-card status-' + sec.status;
+    card.innerHTML = buildSectionHTML(sec);
+
+    if (sec.status === 'open' && !sec.submitted) {
+      const articleEl = card.querySelector('.article-text');
+      if (articleEl) {
+        articleEl.addEventListener('mouseup', function() { onTextSelect(sec.id); });
+        articleEl.addEventListener('touchend', function() { onTextSelect(sec.id); });
+      }
+    }
+
+    if (sec.status === 'revealed') {
+      loadHeatmap(sec.id);
+    }
+  });
+}
+
+function buildSectionHTML(sec) {
+  const badgeMap = {
+    open:     '<span class="badge badge-open">進行中</span>',
+    revealed: '<span class="badge badge-revealed">已公布結果</span>',
+    closed:   '<span class="badge badge-closed">等待中</span>'
+  };
+
+  let badge = badgeMap[sec.status] || '';
+  if (sec.status === 'open' && sec.submitted) {
+    badge = '<span class="badge badge-done">已送出</span>';
+  }
+
+  let body = '';
+
+  if (sec.status === 'closed') {
+    body = `
+      <div class="article-text" style="opacity:0.4;cursor:default">${escHtml(sec.text)}</div>
+      <div class="waiting-msg">等待老師開放本段...</div>`;
+  }
+
+  else if (sec.status === 'open' && !sec.submitted) {
+    body = `
+      <div class="selection-hint">拖曳選取文字以標記重點，可多次選取不同段落</div>
+      <div class="article-text" id="text-${sec.id}">${buildArticleSpans(sec.text)}</div>
+      <div class="selection-toolbar" id="toolbar-${sec.id}">
+        <div class="char-counter" id="counter-${sec.id}">尚未選取文字</div>
+        <button class="btn-submit" id="btn-${sec.id}" onclick="submitSelection(${sec.id})" disabled>確認送出</button>
+        <button class="btn-clear" onclick="clearSelection(${sec.id})">清除全部</button>
+      </div>`;
+  }
+
+  else if (sec.status === 'open' && sec.submitted) {
+    const mine = sec.mySelection;
+    body = `
+      <div class="article-text" style="cursor:default">${escHtml(sec.text)}</div>
+      <div class="submitted-banner">
+        ✓ 你的標記已送出：<span class="my-text">${escHtml(mine ? mine.text : '')}</span>
+        <small style="margin-left:auto;color:#aaa">等待老師公布結果</small>
+      </div>`;
+  }
+
+  else if (sec.status === 'revealed') {
+    body = `
+      <div id="heatmap-${sec.id}">
+        <div style="font-family:sans-serif;font-size:13px;color:#aaa;padding:20px 0">載入熱點圖中...</div>
+      </div>`;
+  }
+
+  return `
+    <div class="section-header">
+      <div class="section-title">${escHtml(sec.title)}</div>
+      ${badge}
+    </div>
+    ${body}`;
+}
+
+// ── 文字轉 span 結構（逐字，換行變 <br>）──────────────────
+function buildArticleSpans(text) {
+  let html = '';
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '\n') {
+      html += '<br>';
+    } else {
+      html += '<span class="ch" data-idx="' + i + '">' + escHtml(text[i]) + '</span>';
+    }
+  }
+  return html;
+}
+
+// ── 計算連續 ranges（gap 全是 \n 就合併）────────────────
+function getContiguousRanges(highlights, text) {
+  if (!highlights || highlights.size === 0) return [];
+  const sorted = Array.from(highlights).sort(function(a, b) { return a - b; });
+  const ranges = [];
+  let start = sorted[0], prev = sorted[0];
+
+  for (let k = 1; k < sorted.length; k++) {
+    const curr = sorted[k];
+    // 檢查 gap 中是否有非換行字元
+    let hasNonNewline = false;
+    for (let j = prev + 1; j < curr; j++) {
+      if (text[j] !== '\n') { hasNonNewline = true; break; }
+    }
+    if (hasNonNewline) {
+      ranges.push({ startIdx: start, endIdx: prev + 1 });
+      start = curr;
+    }
+    prev = curr;
+  }
+  ranges.push({ startIdx: start, endIdx: prev + 1 });
+  return ranges;
+}
+
+// ── 文字選取處理 ──────────────────────────────────────────
+function onTextSelect(sectionId) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+
+  const container = document.getElementById('text-' + sectionId);
+  if (!container) return;
+
+  const range = sel.getRangeAt(0);
+  if (!container.contains(range.startContainer) &&
+      !container.contains(range.commonAncestorContainer)) return;
+
+  if (!sectionHighlights[sectionId]) sectionHighlights[sectionId] = new Set();
+  const highlights = sectionHighlights[sectionId];
+
+  const selected = [];
+  container.querySelectorAll('span.ch').forEach(function(span) {
+    const tn = span.firstChild;
+    if (!tn) return;
+    try {
+      // comparePoint 回傳 -1(前)/0(內)/1(後)
+      // 字元頭尾都在範圍內才算被選：排除「只有邊界恰好碰到」的假陽性
+      const cStart = range.comparePoint(tn, 0); // 字元開頭
+      const cEnd   = range.comparePoint(tn, 1); // 字元結尾
+      if (cStart === 0 && cEnd === 0) selected.push(parseInt(span.dataset.idx, 10));
+    } catch(e) {}
+  });
+
+  sel.removeAllRanges();
+  if (selected.length === 0) return;
+
+  // 全部都已高亮 → 取消選取；否則 → 加入
+  const allHighlighted = selected.every(function(idx) { return highlights.has(idx); });
+  if (allHighlighted) {
+    selected.forEach(function(idx) { highlights.delete(idx); });
+  } else {
+    selected.forEach(function(idx) { highlights.add(idx); });
+  }
+
+  updateHighlights(sectionId);
+}
+
+function updateHighlights(sectionId) {
+  const container = document.getElementById('text-' + sectionId);
+  if (!container) return;
+
+  const highlights = sectionHighlights[sectionId] || new Set();
+  container.querySelectorAll('span.ch').forEach(function(span) {
+    span.classList.toggle('user-highlight', highlights.has(parseInt(span.dataset.idx, 10)));
+  });
+
+  const sec = state.sections.find(function(s) { return s.id === sectionId; });
+  const limit = sec.charLimit;
+  const count = highlights.size;
+  const overLimit = count > limit;
+
+  const toolbar = document.getElementById('toolbar-' + sectionId);
+  const counter = document.getElementById('counter-' + sectionId);
+  const btn     = document.getElementById('btn-' + sectionId);
+
+  if (count > 0 && toolbar) toolbar.classList.add('visible');
+
+  if (counter) {
+    counter.className = 'char-counter ' + (overLimit ? 'over' : (count > 0 ? 'ok' : ''));
+    counter.innerHTML = count > 0
+      ? '已選 <span class="count">' + count + '</span> / ' + limit + ' 字' + (overLimit ? '　⚠ 超過上限' : '　✓')
+      : '尚未選取文字';
+  }
+
+  if (btn) btn.disabled = overLimit || count === 0;
+}
+
+function clearSelection(sectionId) {
+  if (sectionHighlights[sectionId]) sectionHighlights[sectionId].clear();
+  window.getSelection().removeAllRanges();
+  updateHighlights(sectionId);
+  const toolbar = document.getElementById('toolbar-' + sectionId);
+  if (toolbar) toolbar.classList.remove('visible');
+}
+
+// ── 提交 ──────────────────────────────────────────────────
+function submitSelection(sectionId) {
+  const highlights = sectionHighlights[sectionId];
+  if (!highlights || highlights.size === 0) return;
+
+  const sec = state.sections.find(function(s) { return s.id === sectionId; });
+  const ranges = getContiguousRanges(highlights, sec.text);
+  const selectedText = ranges.map(function(r) {
+    return sec.text.slice(r.startIdx, r.endIdx).replace(/\n/g, '');
+  }).join('…');
+
+  const btn = document.getElementById('btn-' + sectionId);
+  btn.disabled = true;
+  btn.textContent = '送出中...';
+
+  google.script.run
+    .withSuccessHandler(function() {
+      showToast('已送出！等待老師公布結果 🎯');
+      loadState();
+    })
+    .withFailureHandler(function(err) {
+      showToast('錯誤：' + err.message, true);
+      btn.disabled = false;
+      btn.textContent = '確認送出';
+    })
+    .submitSelection({
+      sectionId: sectionId,
+      ranges: ranges,
+      selectedText: selectedText
+    });
+}
+
+// ── 熱點圖 ────────────────────────────────────────────────
+function loadHeatmap(sectionId) {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      renderHeatmap(sectionId, result);
+    })
+    .withFailureHandler(function(err) {
+      const el = document.getElementById('heatmap-' + sectionId);
+      if (el) el.innerHTML = '<div style="color:#aaa;font-size:13px;padding:10px 0">結果尚未公布</div>';
+    })
+    .getResults(sectionId);
+}
+
+function renderHeatmap(sectionId, result) {
+  const el = document.getElementById('heatmap-' + sectionId);
+  if (!el) return;
+
+  const sec = state.sections.find(s => s.id === sectionId);
+  const text = sec.text;
+  const heat = result.heat;
+  const maxH = Math.max(...heat, 1);
+
+  // 圖例
+  const legend = `
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#fff9c4"></div> 少數人標記</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffa726"></div> 多人標記</div>
+      <div class="legend-item"><div class="legend-dot" style="border:2px solid #1565c0;background:transparent"></div> 你的標記</div>
+    </div>`;
+
+  // 熱點文字（逐字著色）
+  let heatHTML = '<div class="heatmap-text">';
+  let charIdx = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '\n') {
+      heatHTML += '<br>';
+      charIdx++;
+      continue;
+    }
+    const h = heat[charIdx] || 0;
+    const level = Math.min(5, Math.ceil((h / maxH) * 5));
+    const cls = 'char h' + (h === 0 ? '0' : level);
+    const isMe = result.myRanges && result.myRanges.length > 0
+      ? result.myRanges.some(function(r) { return charIdx >= r.startIdx && charIdx < r.endIdx; })
+      : (result.myStart >= 0 && charIdx >= result.myStart && charIdx < result.myEnd);
+    const myCls = isMe ? ' my-highlight' : '';
+    heatHTML += '<span class="' + cls + myCls + '">' + escHtml(text[i]) + '</span>';
+    charIdx++;
+  }
+  heatHTML += '</div>';
+
+  // 得分
+  const rank = result.leaderboard.findIndex(r => r.score === result.myScore) + 1;
+  const scoreCard = (result.myRanges && result.myRanges.length > 0) || result.myStart >= 0 ? `
+    <div class="score-card">
+      <div class="score-box">
+        <div class="label">共鳴得分</div>
+        <div class="value">${result.myScore}</div>
+      </div>
+      <div class="score-box">
+        <div class="label">班級排名</div>
+        <div class="value"># ${rank}</div>
+      </div>
+    </div>` : '';
+
+  // 排行榜
+  let lb = '<div class="leaderboard"><div class="leaderboard-title">排行榜</div>';
+  result.leaderboard.forEach(function(row, i) {
+    const isMe = (result.myStart >= 0 && row.score === result.myScore && i + 1 === rank);
+    const medals = ['🥇', '🥈', '🥉'];
+    const rankStr = (i < 3 ? medals[i] : (i + 1) + '.');
+    lb += `<div class="leaderboard-row ${isMe ? 'me' : ''}">
+      <span class="rank">${rankStr}</span>
+      <span class="lname">${escHtml(row.name)}</span>
+      <span class="lscore">${row.score} 分</span>
+    </div>`;
+  });
+  lb += '</div>';
+
+  el.innerHTML = legend + heatHTML + scoreCard + lb;
+}
+
+// ── 工具 ──────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function showToast(msg, isError) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'show' + (isError ? ' error' : '');
+  setTimeout(function() { toast.className = ''; }, 3000);
+}
+</script>
+</body>
+</html>

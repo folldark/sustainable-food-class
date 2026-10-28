@@ -683,3 +683,18 @@ body.handout { height: auto; min-height: 100%; overflow: visible; background: va
   .orid-level { grid-template-columns: 1fr; gap: 0.5rem; }
   .orid-level > b { font-size: 4.5rem; }
 }
+
+/* 2026-10-29 剩食議題：左圖右問句（.photo-question）、全部靠左的表格、較密的清單 */
+.photo-question { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+.photo-question figure { margin: 0; }
+.photo-question img { display: block; width: 100%; max-height: 72vh; object-fit: cover; border-radius: 1.2rem; box-shadow: var(--shadow); }
+.photo-question .display-copy.compact { max-width: 18ch; }
+.photo-question .question-ending { margin-top: 1.2rem; font-size: clamp(1.1rem, 2vw, 1.8rem); }
+.data-table.plain td:not(:first-child), .data-table.plain th:not(:first-child) { text-align: left; }
+.data-table.plain td:first-child { white-space: nowrap; font-weight: 800; color: var(--forest); }
+.big-list.compact-list { max-width: 60rem; font-size: clamp(1.05rem, 2.2vw, 2rem); }
+@media (max-width: 760px) {
+  .photo-question { grid-template-columns: 1fr; gap: 1rem; align-content: center; }
+  .photo-question img { max-height: 34vh; }
+  .data-table.plain td:first-child { white-space: normal; }
+}

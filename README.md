@@ -9,6 +9,16 @@
 - **2026-09-17 為什麼跨國企業壓榨小農**，共 20 張投影片。由舊 Keynote 投影片（14 頁 PDF）轉製：從早餐那杯咖啡出發，咖啡產業現況（全球、區域、台灣、生豆價格）換成 2026 年 8 月 ICO 月報與台灣近兩年統計，「來種咖啡好不好？」之後插入志祺七七的咖啡產業影片連結，再進三個咖啡農情境題、資本主義的強制競爭原則與 SDGs。
 - **2026-10-08 鹽漬與糖漬**，共 26 張投影片，另附三份長文頁面。第一段針對〈當執行長的一天〉心得，說明「詳答」的五個零件與五段式綜合心得（含法國哲學會考的對照）；第二段分組實作摩洛哥醃檸檬與糖漬檸檬。`salt-lemon.html`（原講義延伸版）、`sugar-lemon.html`（新寫）、`writing-guide.html`（學生用寫作指引，含檢核表與評分規準）。原講義 PDF 逐字轉錄為 `講義原稿.md`。
 - **2026-10-22 農村的遠見與 ORID**，共 23 張投影片。老師公差、學生自主上課：登入公視+，《農村的遠見》（台語版）十集任選一集看完，以 ORID（客觀／感受／詮釋／決定）填寫學習單；ORID 四層各一張說明，示範用 10/8 的醃檸檬實作走一次。附學習單 `worksheet.html`（A4 一頁可列印）與 `orid-worksheet.docx`（電子繳交用，以 python-docx 產生）；繳交紙本或電子檔皆可。`styles.css` 末尾新增 `.episode-grid`、`.orid-grid`、`.orid-level`、`.flow-three`／`.flow-four`、`.link-card.light`。
+- **2026-10-29 剩食議題**，共 32 張投影片。引起動機三問（鮮奶、雞腿、家裡的廚餘，圖為 Codex 生成的示意圖）→《我們的島》1354 集與八題搶答（第 3～8 題依影片逐字稿擬）→ 用重點標記遊戲共讀《剩食風暴》→ 小結 → 作業（觀察組填 Google 表單、訪談組訪談同學與老師）。附 `article.html`（鏡新聞《剩食風暴》改寫的六段閱讀講義，原稿 `剩食風暴_改寫稿.md`）與 `homework.html`（分組、表單連結、訪綱）。`styles.css` 末尾新增 `.photo-question`、`.data-table.plain`、`.big-list.compact-list`。
+
+## 重點標記閱讀遊戲（`reading-game/`）
+
+課堂上共讀文章、比對大家畫的重點用的 Google Apps Script 網頁應用程式，從 `folldark/vehicle-readingGame` 複製並改成「換文章只改 `Article.gs`」。這個資料夾不是 GitHub Pages 的內容，而是用 clasp 推到獨立的 GAS 專案：
+
+- 指令碼：`reading-game/.clasp.json` 的 `scriptId`（擁有者 ht341）；部署以 `clasp create-deployment` 建立、之後用 `clasp update-deployment <deploymentId>` 更新同一網址。
+- 執行身分改為「我（ht341）」、存取權「網域內使用者」，學生不需要試算表權限；資料試算表在第一次有人開啟時自動建立（不必手動跑 `initGame`）。
+- 學生網址一律用網域版 `script.google.com/a/macros/hmjh.chc.edu.tw/s/<deploymentId>/exec`，並請學生開無痕視窗；教師面板在網址後加 `?mode=admin`。
+- 換文章：改 `Article.gs` 的 `GAME_TITLE` 與 `SECTIONS` → `clasp push` → 更新部署 → 在 GAS 專案設定刪除指令碼屬性 `SPREADSHEET_ID`，讓下次開啟時建一份新的試算表。
 
 ## 目錄結構
 
